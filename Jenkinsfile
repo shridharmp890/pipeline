@@ -1,41 +1,58 @@
 pipeline {
-    agent any
-
+    agent { label 'docker-agent' }
     environment {
-        IMAGE_NAME = "shashankbiradar/flask-devops-app"
+        IMAGE_NAME = "shashankbiradar/devops-project"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
     }
-
     stages {
-        stage('Clone Repository') {
+        stage('Clone Repo') {
             steps {
-                checkout scm
+                deleteDir()
+                sh 'git clone https://github.com/biradarshashank413-sudo/devops-project.git .'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
             }
         }
-
-        stage('Push Docker Image') {
+        stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
                 )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $IMAGE_NAME'
+                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${IMAGE_NAME}:latest"
                 }
             }
         }
-
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to GKE') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
+                withCredentials([file(
+                    credentialsId: '113962110009254531075',
+                    variable: 'GCP_KEY'
+                )]) {
+                    sh """
+                        gcloud auth activate-service-account --key-file=\$GCP_KEY
+                        gcloud config set project jenkins-doc
+                        gcloud container clusters get-credentials cluster-jenkins \
+                            --zone us-central1-c
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        kubectl set image deployment/flask-app \
+                            flask-app=${IMAGE_NAME}:${IMAGE_TAG}
+                        kubectl rollout status deployment/flask-app
+                    """
+                }
             }
         }
+    }
+    post {
+        success { echo '✅ Deployed to GKE!' }
+        failure { echo '❌ Build failed!' }
     }
 }
