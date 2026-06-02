@@ -8,7 +8,7 @@ pipeline {
         stage('Clone Repo') {
             steps {
                 deleteDir()
-                sh 'git clone https://github.com/biradarshashank413-sudo/devops-project.git .'
+                sh 'https://github.com/shridharmp890/pipeline.git .'
             }
         }
         stage('Build Docker Image') {
