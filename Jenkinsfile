@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'docker-agent' }
     environment {
-        IMAGE_NAME = "shashankbiradar/devops-project"
+        IMAGE_NAME = "shridhar8899/devops-project"
         IMAGE_TAG  = "${BUILD_NUMBER}"
     }
     stages {
