@@ -8,7 +8,7 @@ pipeline {
         stage('Clone Repo') {
             steps {
                 deleteDir()
-                sh 'https://github.com/shridharmp890/pipeline.git .'
+                sh 'git clone https://github.com/shridharmp890/pipeline.git .'
             }
         }
         stage('Build Docker Image') {
@@ -24,7 +24,7 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-                    sh "echo \$PASS | docker login -u \$USER --password-stdin"
+                    sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
                     sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "docker push ${IMAGE_NAME}:latest"
                 }
