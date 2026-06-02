@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to GKE') {
             steps {
                 withCredentials([file(
-                    credentialsId: '113962110009254531075',
+                    credentialsId: '110858785515870588284',
                     variable: 'GCP_KEY'
                 )]) {
                     sh """
