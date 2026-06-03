@@ -38,7 +38,7 @@ pipeline {
                 )]) {
                     sh """
                         gcloud auth activate-service-account --key-file=\$GCP_KEY
-                        gcloud config set project devops-k8s-project
+                        gcloud config set project devops-k8s-project-497606
                         gcloud container clusters get-credentials cluster-jenkins \
                             --zone us-central1-c
                         kubectl apply -f k8s/deployment.yaml
