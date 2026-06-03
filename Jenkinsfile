@@ -43,9 +43,9 @@ pipeline {
                             --zone us-central1-c
                         kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/service.yaml
-                        kubectl set image deployment/flask-app \
+                        kubectl set image deployment/flask-devops-app \
                             flask-app=${IMAGE_NAME}:${IMAGE_TAG}
-                        kubectl rollout status deployment/flask-app
+                        kubectl rollout status deployment/flask-devops-app
                     """
                 }
             }
